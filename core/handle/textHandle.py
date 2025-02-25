@@ -3,6 +3,7 @@ import json
 from core.handle.abortHandle import handleAbortMessage
 from core.handle.helloHandle import handleHelloMessage
 from core.handle.audioHandle import startToChat
+from core.handle.iotHandle import handleIotDescriptors
 
 TAG = __name__
 logger = setup_logging()
@@ -25,16 +26,6 @@ async def handleTextMessage(conn, message):
                 conn.client_listen_mode = msg_json["mode"]
                 logger.bind(tag=TAG).debug(f"客户端拾音模式：{conn.client_listen_mode}")
             if msg_json["state"] == "start":
-                if conn.music_handler.is_playing:
-                    conn.music_handler.stop_playing()
-                    await conn.websocket.send(json.dumps({
-                        "type": "tts",
-                        "state": "stop",
-                        "session_id": conn.session_id
-                    }))
-                    conn.clearSpeakStatus()
-                    conn.asr_audio.clear()
-                    conn.asr_server_receive = True
                 conn.client_have_voice = True
                 conn.client_voice_stop = False
             elif msg_json["state"] == "stop":
@@ -46,5 +37,9 @@ async def handleTextMessage(conn, message):
                 conn.asr_audio.clear()
                 if "text" in msg_json:
                     await startToChat(conn, msg_json["text"])
+        elif msg_json["type"] == "iot":
+            if "descriptors" in msg_json:
+                pass
+                # await handleIotDescriptors(conn, msg_json["descriptors"])
     except json.JSONDecodeError:
         await conn.websocket.send(message)

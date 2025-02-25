@@ -3,15 +3,9 @@ import json
 import asyncio
 import time
 from core.utils.util import remove_punctuation_and_length, get_string_no_punctuation_or_emoji
-from core.handle.musicHandler import MusicHandler
 
 TAG = __name__
 logger = setup_logging()
-
-
-class AudioHandler:
-    def __init__(self, config):
-        self.music_handler = MusicHandler(config)
 
 
 async def handleAudioMessage(conn, audio):
@@ -41,10 +35,6 @@ async def handleAudioMessage(conn, audio):
             text, file_path = await conn.asr.speech_to_text(conn.asr_audio, conn.session_id)
             logger.bind(tag=TAG).info(f"识别文本: {text}")
             text_len, text_without_punctuation = remove_punctuation_and_length(text)
-            if await conn.music_handler.handle_music_command(conn, text_without_punctuation):
-                conn.asr_server_receive = True
-                conn.asr_audio.clear()
-                return
             if text_len <= conn.max_cmd_length and await handleCMDMessage(conn, text_without_punctuation):
                 return
             if text_len > 0:
