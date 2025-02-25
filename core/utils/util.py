@@ -90,8 +90,8 @@ def remove_punctuation_and_length(text):
                       char not in full_width_punctuations and char not in half_width_punctuations and char not in space and char not in full_width_space])
 
     if result == "Yeah":
-        return 0, ""
-    return 0, result
+        return 0, result
+    return len(result), result
 
 
 def check_password(password):
