@@ -3,7 +3,7 @@
     <el-container style="height: 100%;">
       <el-header class="header">
         <div style="display: flex;justify-content: space-between;">
-          <div style="display: flex;align-items: center;gap: 8px;">
+          <div style="display: flex;align-items: center;gap: 8px;margin-top: 10px;">
             <img src="@/assets/xiaozhi-logo.png" alt="" style="width: 45px;height: 45px;" />
             <img src="@/assets/xiaozhi-ai.png" alt="" style="width: 70px;height: 13px;" />
             <div class="equipment-management" @click="settingDevice=false">
@@ -19,15 +19,16 @@
               <img src="@/assets/home/close.png" alt="" style="width: 6px;height: 6px;" />
             </div>
           </div>
-          <div style="display: flex;align-items: center;gap: 8px;">
+          <div style="display: flex;align-items: center;gap: 8px;margin-top: 10px">
             <div class="serach-box">
-              <el-input placeholder="输入名称搜索.." v-model="serach" />
+              <el-input placeholder="输入名称搜索.." v-model="serach" style="border: none; background: transparent;" @keyup.enter.native="handleSearch"  />
               <img src="@/assets/home/search.png" alt=""
-                style="width: 12px;height: 12px;margin-right: 11px;cursor: pointer;" />
+                style="width: 12px;height: 12px;margin-right: 11px;cursor: pointer;" @click="handleSearch" />
             </div>
             <img src="@/assets/home/avatar.png" alt="" style="width: 21px;height: 21px;" />
             <div class="user-info">
-              158 3632 4642</div>
+              {{ userInfo.mobile }}
+            </div>
           </div>
         </div>
       </el-header>
@@ -55,20 +56,21 @@
             </div>
           </div>
           <div
-            style="display: flex;flex-wrap: wrap;margin-top: 15px;gap: 15px;justify-content: space-between;box-sizing: border-box;">
-            <div class="device-item" v-for="(item,index) in 10" :key="index">
-              <div style="display: flex;justify-content: space-between;">
+            style="display: flex;flex-wrap: wrap;margin-top: 15px;gap: 15px;justify-content: flex-start;box-sizing: border-box;">
+            <div class="device-item" v-for="(item,index) in filteredDeviceList" :key="index">
+              <div style="display: flex;justify-content: space-between; align-items: center; ">
                 <div style="font-weight: 700;font-size: 18px;text-align: left;color: #3d4566;">
-                  CC:ba:97:11:a6:ac
+<!--                  CC:ba:97:11:a6:ac-->
+                  {{item.list[0]?.mac_address}}
                 </div>
-                <div>
+                <div style="display: flex;align-items: center;">
                   <img src="@/assets/home/delete.png" alt=""
-                    style="width: 18px;height: 18px;margin-right: 8px;" />
+                    style="width: 18px;height: 18px;margin-right: 8px;" @click="unbindDevice(item.list[0]?.id)" />
                   <img src="@/assets/home/info.png" alt="" style="width: 18px;height: 18px;" />
                 </div>
               </div>
               <div class="device-name">
-                设备型号：esp32-s3-touch-amoled-1.8
+                设备型号：{{item.list[0]?.device_type}}
               </div>
               <div style="display: flex;gap: 8px;align-items: center;">
                 <div class="settings-btn" @click="clickSettingDevice">
@@ -77,30 +79,30 @@
                   声纹识别</div>
                 <div class="settings-btn">
                   历史对话</div>
-                <el-switch v-model="switchValue" inactive-text="OTA升级:" :width="32"
+                <el-switch :value="item.list[0]?.ota_upgrade && true || false" inactive-text="OTA升级:" :width="32"
                   style="margin-left: auto;" />
               </div>
               <div class="version-info">
-                <div>最近对话：6天前</div>
-                <div>APP版本：1.1.0</div>
+                <div>最近对话：{{item.list[0]?.recent_chat_time}}</div>
+                <div>APP版本：{{item.list[0]?.app_version}}</div>
               </div>
             </div>
           </div>
         </div>
-<div v-show="settingDevice" style="border-radius: 20px;background: #fafcfe;">
+<div v-show="settingDevice" style="border-radius: 18px;background: #fafcfe;">
           <div
-            style="padding: 19px 30px;font-weight: 700;font-size: 24px;text-align: left;color: #3d4566;display: flex;gap: 16px;align-items: center;">
+            style="padding: 17px 27px;font-weight: 700;font-size: 21px;text-align: left;color: #3d4566;display: flex;gap: 14px;align-items: center;">
             <div
-              style="width: 46px;height: 46px;background: #5778ff;border-radius: 50%;display: flex;align-items: center;justify-content: center;">
-              <img src="@/assets/home/setting-user.png" alt="" style="width: 24px;height: 24px;" />
+              style="width: 41px;height: 41px;background: #5778ff;border-radius: 50%;display: flex;align-items: center;justify-content: center;">
+              <img src="@/assets/home/setting-user.png" alt="" style="width: 21px;height: 21px;" />
             </div>
             CC:ba:97:11:a6:ac
           </div>
           <div style="height: 1px;background: #e8f0ff;" />
-          <el-form ref="form" :model="form" label-width="90px">
-            <div style="padding: 20px 30px;max-width: 990px;">
+          <el-form ref="form" :model="form" label-width="81px">
+            <div style="padding: 18px 28px;max-width: 890px;">
               <el-form-item label="助手昵称：">
-                <div class="input-46">
+                <div class="input-46" style="width: 57.5%;">
                   <el-input v-model="form.name" />
                 </div>
               </el-form-item>
@@ -119,7 +121,7 @@
                 </div>
               </el-form-item>
               <el-form-item label="角色音色：">
-                <div style="display: flex;gap: 10px;align-items: center;">
+                <div style="display: flex;gap: 9px;align-items: center;">
                   <div class="input-46" style="flex:1.4;">
                     <el-select v-model="form.timbre" placeholder="请选择" style="width: 100%;">
                       <el-option v-for="item in options" :key="item.value" :label="item.label"
@@ -135,28 +137,28 @@
               </el-form-item>
               <el-form-item label="角色介绍：">
                 <div class="textarea-box">
-                  <el-input type="textarea" rows="6" resize="none" placeholder="请输入内容"
+                  <el-input type="textarea" rows="5.4" resize="none" placeholder="请输入内容"
                     v-model="form.introduction" maxlength="2000" show-word-limit />
                 </div>
               </el-form-item>
               <el-form-item label="记忆体：">
                 <div class="textarea-box">
-                  <el-input type="textarea" rows="6" resize="none" placeholder="请输入内容"
+                  <el-input type="textarea" rows="5.4" resize="none" placeholder="请输入内容"
                     v-model="form.prompt" maxlength="1000" />
                   <div class="prompt-bottom">
                     <div style="display: flex;gap: 10px;align-items: center;">
-                      <div style="color: #979db1;font-size: 14px;">当前记忆（每次对话后重新生成）</div>
+                      <div style="color: #979db1;font-size: 12px;">当前记忆（每次对话后重新生成）</div>
                       <div class="clear-btn">
-                        <i class="el-icon-delete-solid" style="font-size: 14px;" />
+                        <i class="el-icon-delete-solid" style="font-size: 12px;" />
                         清除
                       </div>
                     </div>
-                    <div style="color: #979db1;font-size:14px;">{{form.prompt.length}}/1000</div>
+                    <div style="color: #979db1;font-size:12px;">{{form.prompt.length}}/1000</div>
                   </div>
                 </div>
               </el-form-item>
               <el-form-item label="语言模型（内测）：" class="lh-form-item">
-                <div style="display: flex;gap: 10px;">
+                <div style="display: flex;gap: 9px;">
                   <div class="input-46" style="width: 100%;">
                     <el-select v-model="form.model" placeholder="请选择" style="width: 100%;">
                       <el-option v-for="item in options" :key="item.value" :label="item.label"
@@ -172,23 +174,24 @@
               </el-form-item>
             </div>
           </el-form>
-          <div style="display: flex;padding: 20px;gap: 10px;align-items: center;">
+          <div style="display: flex;padding: 18px;gap: 9px;align-items: center;">
             <div class="save-btn">
               保存配置</div>
             <div class="reset-btn">
               重制</div>
             <div class="clear-text">
-              <img src="@/assets/home/red-info.png" alt="" style="width: 24px;height: 24px;" />
+              <img src="@/assets/home/red-info.png" alt="" style="width: 21px;height: 21px;" />
               保存配置后，需要重启设备，新的配置才会生效。
             </div>
           </div>
         </div>
         <div
           style="font-size: 12px;font-weight: 400;margin-top: auto;padding-top: 30px;color: #979db1;">
-          ©2025 xiaozhi-esp32-server</div>
+          ©2025 xiaozhi-esp32-server
+        </div>
       </el-main>
     </el-container>
-    <el-dialog :visible.sync="addDeviceDialogVisible" width="480px" center>
+    <el-dialog :visible.sync="addDeviceDialogVisible" width="400px" center>
       <div
         style="margin: 0 20px 20px;display: flex;align-items: center;gap: 10px;font-weight: 700;font-size: 20px;text-align: left;color: #3d4566;;">
         <div
@@ -220,11 +223,15 @@
 <script>
 // @ is an alias to /src
 
+import Api from '@/apis/api';
+
 export default {
   name: 'home',
   data() {
     return {
-      serach: '',
+      serach: '', // 搜索框输入内容
+      deviceList: [], // 原始设备列表
+      filteredDeviceList: [], // 过滤后的设备列表
       switchValue: false,
       addDeviceDialogVisible: false,
       deviceCode: "",
@@ -242,8 +249,11 @@ export default {
       }, {
         value: '选项2',
         label: '双皮奶'
-      }]
-    }
+      }],
+      userInfo: {
+        mobile: '' // 初始化用户信息
+      }
+    };
   },
   methods: {
     showAddDialog() {
@@ -251,10 +261,65 @@ export default {
     },
     clickSettingDevice() {
       this.settingDevice = true
-    }
+    },
+    // 获取用户信息
+    fetchUserInfo() {
+      Api.user.getUserInfo(({data}) => {
+        this.userInfo = data.data
+      });
+    },
+    // 获取已绑设备
+    getList(){
+      Api.user.getHomeList(({data})=>{
+        this.deviceList = data.data; // 保存原始设备列表
+        this.filteredDeviceList = data.data; // 初始化过滤后的设备列表
+      })
+    },
+    // 处理搜索
+    handleSearch() {
+      if (this.serach.trim() === '') {
+        // 如果搜索框为空，显示全部设备
+        this.filteredDeviceList = this.deviceList;
+      } else {
+        // 过滤设备列表
+        this.filteredDeviceList = this.deviceList.filter(device => {
+          return (
+            device.list[0]?.mac_address?.includes(this.serach) ||  // 匹配MAC地址
+            device.list[0]?.device_type?.includes(this.serach) ||  // 匹配设备型号
+            device.list[0]?.app_version?.includes(this.serach)     // 匹配APP版本
+          );
+        });
+      }
+    },
+    // 解绑设备
+    unbindDevice(device_id) {
+      this.$confirm('确定要解绑该设备吗？', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(() => {
+        // 调用解绑设备的接口
+        Api.user.unbindDevice(device_id, ({ data }) => {
+          if (data.code === 0) {
+            this.$message.success('解绑成功');
+            this.getList();
+          } else {
+            this.$message.error(data.msg || '解绑失败');
+          }
+        });
+      }).catch(() => {
+        // 用户取消操作
+        this.$message.info('已取消解绑');
+      });
+    },
+  },
+  mounted() {
+    this.fetchUserInfo(); // 组件加载时获取用户信息
+    this.getList(); // 初始化设备列表
   }
 }
 </script>
+
 <style scoped lang="scss">
 .welcome {
   min-width: 900px;
@@ -356,11 +421,14 @@ export default {
 }
 .serach-box {
   display: flex;
-  width: 230px;
+  width: 250px;
   height: 30px;
   border-radius: 15px;
-  background-color: #e2f5f7;
+  background-color: #f6fcfe66;
+  border: 1px solid #e4e6ef;
   align-items: center;
+  padding: 0 10px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 .user-info {
   font-weight: 600;
@@ -389,7 +457,7 @@ export default {
 }
 .template-item {
   height: 35px;
-  width: 75px;
+  width: 85px;
   border-radius: 8px;
   background: #e6ebff;
   line-height: 35px;
@@ -461,7 +529,7 @@ export default {
   }
 }
 .device-item {
-  width: 341px;
+  width: 345px;
   border-radius: 15px;
   background: #fafcfe;
   padding: 22px;
@@ -504,6 +572,7 @@ audio::-webkit-media-controls-panel {
   line-height: 34px;
   box-sizing: border-box;
   cursor: pointer;
+  font-size: 12px;
 }
 .save-btn {
   border-radius: 23px;
@@ -526,6 +595,14 @@ audio::-webkit-media-controls-panel {
     border: none !important;
     padding: 15px;
   }
+  // 搜索输入框的样式调整
+  .serach-box .el-input__inner {
+    border: none;
+    background-color: transparent;
+    padding: 0 5px 0 15px;
+    font-size: 12px;
+    color: #3d4566;
+  }
   .el-textarea .el-input__count {
     color: #979db1;
     font-size: 11px;
@@ -533,13 +610,14 @@ audio::-webkit-media-controls-panel {
     background-color: transparent;
   }
   .el-input__inner {
-    border: none;
-    background-color: transparent;
+    //border: none;
+    //background-color: transparent;
     padding: 0 5px 0 15px;
+    border-radius: 8px;
   }
   .input-46 .el-input__inner {
     padding: 0 15px;
-    height: 46px;
+    height: 38px;
   }
   .lh-form-item {
     .el-form-item__label {
@@ -596,3 +674,5 @@ audio::-webkit-media-controls-panel {
   }
 }
 </style>
+
+
