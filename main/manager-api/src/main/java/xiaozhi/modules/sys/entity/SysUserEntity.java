@@ -1,13 +1,14 @@
 package xiaozhi.modules.sys.entity;
 
+import java.util.Date;
+
 import com.baomidou.mybatisplus.annotation.FieldFill;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableName;
-import xiaozhi.common.entity.BaseEntity;
+
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-
-import java.util.Date;
+import xiaozhi.common.entity.BaseEntity;
 
 /**
  * 系统用户
@@ -25,18 +26,13 @@ public class SysUserEntity extends BaseEntity {
      */
     private String password;
     /**
-     * 超级管理员   0：否   1：是
+     * 超级管理员 0：否 1：是
      */
     private Integer superAdmin;
     /**
-     * 状态  0：停用   1：正常
+     * 状态 0：停用 1：正常
      */
     private Integer status;
-    /**
-     * 更新者
-     */
-    @TableField(fill = FieldFill.INSERT)
-    private Date createDate;
     /**
      * 更新者
      */
@@ -47,10 +43,5 @@ public class SysUserEntity extends BaseEntity {
      */
     @TableField(fill = FieldFill.INSERT_UPDATE)
     private Date updateDate;
-    /**
-     * 部门名称
-     */
-    @TableField(exist = false)
-    private String deptName;
 
 }

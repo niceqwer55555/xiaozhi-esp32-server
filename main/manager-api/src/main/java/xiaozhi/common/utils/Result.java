@@ -1,16 +1,10 @@
 package xiaozhi.common.utils;
 
-import xiaozhi.common.exception.ErrorCode;
-import xiaozhi.common.page.PageData;
-import xiaozhi.modules.security.user.SecurityUser;
+import java.io.Serializable;
+
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
-import org.apache.commons.lang3.StringUtils;
-
-import java.io.Serializable;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import xiaozhi.common.exception.ErrorCode;
 
 /**
  * 响应数据
@@ -40,10 +34,6 @@ public class Result<T> implements Serializable {
     public Result<T> ok(T data) {
         this.setData(data);
         return this;
-    }
-
-    public boolean success() {
-        return code == 0;
     }
 
     public Result<T> error() {

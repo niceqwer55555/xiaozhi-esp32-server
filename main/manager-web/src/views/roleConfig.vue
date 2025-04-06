@@ -1,100 +1,74 @@
 <template>
   <div class="welcome">
-    <!-- 公共头部 -->
-    <HeaderBar/>
-    <el-main style="padding: 20px;display: flex;flex-direction: column;">
-      <div style="border-radius: 20px;background: #fafcfe;">
+    <HeaderBar />
+    <el-main style="padding: 16px;display: flex;flex-direction: column;">
+      <div style="border-radius: 16px;background: #fafcfe; border: 1px solid #e8f0ff;">
         <div
-            style="padding: 19px 30px;font-weight: 700;font-size: 24px;text-align: left;color: #3d4566;display: flex;gap: 16px;align-items: center;">
+          style="padding: 15px 24px;font-weight: 700;font-size: 19px;text-align: left;color: #3d4566;display: flex;gap: 13px;align-items: center;">
           <div
-              style="width: 46px;height: 46px;background: #5778ff;border-radius: 50%;display: flex;align-items: center;justify-content: center;">
-            <img src="@/assets/home/setting-user.png" alt="" style="width: 24px;height: 24px;"/>
+            style="width: 37px;height: 37px;background: #5778ff;border-radius: 50%;display: flex;align-items: center;justify-content: center;">
+            <img loading="lazy" src="@/assets/home/setting-user.png" alt="" style="width: 19px;height: 19px;" />
           </div>
-          {{ deviceMac }}
+          {{ form.agentName }}
         </div>
-        <div style="height: 1px;background: #e8f0ff;"/>
-        <el-form ref="form" :model="form" label-width="90px">
-          <div style="padding: 20px 30px;max-width: 990px;">
-            <el-form-item label="助手昵称：">
-              <div class="input-46">
-                <el-input v-model="form.name"/>
-              </div>
-            </el-form-item>
-            <el-form-item label="角色模版：">
-              <div style="display: flex;gap: 10px;">
-                <div class="template-item">
-                  台湾女友
-                </div>
-                <div class="template-item">
-                  土豆子
-                </div>
-                <div class="template-item">
-                  英语老师
-                </div>
-                <div class="template-item">
-                  好奇小男孩
-                </div>
-                <div class="template-item">
-                  汪汪队队长
-                </div>
-              </div>
-            </el-form-item>
-            <el-form-item label="角色音色：">
-              <div style="display: flex;gap: 10px;align-items: center;">
-                <div class="input-46" style="flex:1.4;">
-                  <el-select v-model="form.timbre" placeholder="请选择" style="width: 100%;">
-                    <el-option v-for="item in options" :key="item.value" :label="item.label"
-                               :value="item.value">
-                    </el-option>
-                  </el-select>
-                </div>
-                <div class="audio-box">
-                  <audio src="http://music.163.com/song/media/outer/url?id=447925558.mp3" controls
-                         style="height: 100%;width: 100%;"/>
-                </div>
-              </div>
-            </el-form-item>
-            <el-form-item label="角色介绍：">
-              <div class="textarea-box">
-                <el-input type="textarea" rows="6" resize="none" placeholder="请输入内容"
-                          v-model="form.introduction" maxlength="2000" show-word-limit/>
-              </div>
-            </el-form-item>
-            <el-form-item label="记忆体：">
-              <div class="textarea-box">
-                <el-input type="textarea" rows="6" resize="none" placeholder="请输入内容"
-                          v-model="form.prompt" maxlength="1000"/>
-                <div class="prompt-bottom">
-                  <div style="display: flex;gap: 10px;align-items: center;">
-                    <div style="color: #979db1;font-size: 14px;">当前记忆（每次对话后重新生成）</div>
-                    <div class="clear-btn">
-                      <i class="el-icon-delete-solid" style="font-size: 14px;"/>
-                      清除
+        <div style="height: 1px;background: #e8f0ff;" />
+        <el-form ref="form" :model="form" label-width="72px">
+          <div style="padding: 16px 24px;">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
+              <div>
+                <el-form-item label="助手昵称：">
+                  <div class="input-46" style="width: 100%;">
+                    <el-input v-model="form.agentName" />
+                  </div>
+                </el-form-item>
+                <el-form-item label="角色模版：">
+                  <div style="display: flex;gap: 8px;flex-wrap: wrap;">
+                    <div v-for="(template, index) in templates" :key="`template-${index}`" class="template-item"
+                      :class="{ 'template-loading': loadingTemplate }" @click="selectTemplate(template)">
+                      {{ template.agentName }}
                     </div>
                   </div>
-                  <div style="color: #979db1;font-size:14px;">{{ form.prompt.length }}/1000</div>
-                </div>
+                </el-form-item>
+                <el-form-item label="角色介绍：">
+                  <div class="textarea-box">
+                    <el-input type="textarea" rows="5" resize="none" placeholder="请输入内容" v-model="form.systemPrompt"
+                      maxlength="2000" show-word-limit />
+                  </div>
+                </el-form-item>
+                <el-form-item label="语言编码：">
+                  <div class="input-46" style="width: 100%;">
+                    <el-input v-model="form.langCode" placeholder="请输入语言编码，如：zh_CN" maxlength="10" show-word-limit />
+                  </div>
+                </el-form-item>
+                <el-form-item label="交互语种：">
+                  <div class="input-46" style="width: 100%;">
+                    <el-input v-model="form.language" placeholder="请输入交互语种，如：中文" maxlength="10" show-word-limit />
+                  </div>
+                </el-form-item>
               </div>
-            </el-form-item>
-            <el-form-item label="语言模型（内测）：" class="lh-form-item">
-              <div style="display: flex;gap: 10px;">
-                <div class="input-46" style="width: 100%;">
-                  <el-select v-model="form.model" placeholder="请选择" style="width: 100%;">
-                    <el-option v-for="item in options" :key="item.value" :label="item.label"
-                               :value="item.value">
-                    </el-option>
+              <div>
+                <el-form-item v-for="(model, index) in models" :key="`model-${index}`" :label="model.label"
+                  class="model-item">
+                  <el-select v-model="form.model[model.key]" filterable placeholder="请选择" class="select-field">
+                    <el-option v-for="(item, optionIndex) in modelOptions[model.type]"
+                      :key="`option-${index}-${optionIndex}`" :label="item.label" :value="item.value" />
                   </el-select>
-                </div>
+                </el-form-item>
+                <el-form-item label="角色音色：">
+                  <div style="display: flex;gap: 8px;align-items: center;">
+                    <div class="input-46" style="width: 100%;">
+                      <el-select v-model="form.ttsVoiceId" placeholder="请选择" style="width: 100%;">
+                        <el-option v-for="(item, index) in voiceOptions" :key="`voice-${index}`" :label="item.label"
+                          :value="item.value" />
+                      </el-select>
+                    </div>
+                  </div>
+                </el-form-item>
               </div>
-            </el-form-item>
-            <el-form-item label="" class="lh-form-item">
-              <div style="color: #979db1;text-align: left;">除了“Qwen
-                实时”，其他模型通常会增加约1秒的延迟。改变模型后，建议清空记忆体，以免影响体验。
-              </div>
-            </el-form-item>
+            </div>
           </div>
         </el-form>
-        <div style="display: flex;padding: 20px;gap: 10px;align-items: center;">
+        <div style="display: flex;padding: 16px;gap: 8px;align-items: center;">
           <div class="save-btn" @click="saveConfig">
             保存配置
           </div>
@@ -102,12 +76,12 @@
             重制
           </div>
           <div class="clear-text">
-            <img src="@/assets/home/red-info.png" alt="" style="width: 24px;height: 24px;"/>
+            <img loading="lazy" src="@/assets/home/red-info.png" alt="" style="width: 19px;height: 19px;" />
             保存配置后，需要重启设备，新的配置才会生效。
           </div>
         </div>
       </div>
-      <div style="font-size: 12px;font-weight: 400;margin-top: auto;padding-top: 30px;color: #979db1;">
+      <div class="copyright">
         ©2025 xiaozhi-esp32-server
       </div>
     </el-main>
@@ -115,34 +89,70 @@
 </template>
 
 <script>
+import Api from '@/apis/api';
 import HeaderBar from "@/components/HeaderBar.vue";
+
 
 export default {
   name: 'RoleConfigPage',
-  components: {HeaderBar},
+  components: { HeaderBar },
   data() {
     return {
-      deviceMac: 'CC:ba:97:11:a6:ac',
       form: {
-        name: "",
-        timbre: "",
-        introduction: "",
-        prompt: "",
-        model: ""
+        agentCode: "",
+        agentName: "",
+        ttsVoiceId: "",
+        systemPrompt: "",
+        langCode: "",
+        language: "",
+        sort: "",
+        model: {
+          ttsModelId: "",
+          vadModelId: "",
+          asrModelId: "",
+          llmModelId: "",
+          memModelId: "",
+          intentModelId: "",
+        }
       },
-      options: [{
-        value: '选项1',
-        label: '黄金糕'
-      }, {
-        value: '选项2',
-        label: '双皮奶'
-      }]
+      models: [
+        { label: '语音活动检测(VAD)', key: 'vadModelId', type: 'VAD' },
+        { label: '语音识别(ASR)', key: 'asrModelId', type: 'ASR' },
+        { label: '大语言模型(LLM)', key: 'llmModelId', type: 'LLM' },
+        { label: '意图识别(Intent)', key: 'intentModelId', type: 'Intent' },
+        { label: '记忆(Memory)', key: 'memModelId', type: 'Memory' },
+        { label: '语音合成(TTS)', key: 'ttsModelId', type: 'TTS' },
+      ],
+      modelOptions: {},
+      templates: [],
+      loadingTemplate: false,
+      voiceOptions: [],
     }
   },
   methods: {
     saveConfig() {
-      // 此处写保存配置逻辑
-      this.$message.success('配置已保存')
+      const configData = {
+        agentCode: this.form.agentCode,
+        agentName: this.form.agentName,
+        asrModelId: this.form.model.asrModelId,
+        vadModelId: this.form.model.vadModelId,
+        llmModelId: this.form.model.llmModelId,
+        ttsModelId: this.form.model.ttsModelId,
+        ttsVoiceId: this.form.ttsVoiceId,
+        memModelId: this.form.model.memModelId,
+        intentModelId: this.form.model.intentModelId,
+        systemPrompt: this.form.systemPrompt,
+        langCode: this.form.langCode,
+        language: this.form.language,
+        sort: this.form.sort
+      };
+      Api.agent.updateAgentConfig(this.$route.query.agentId, configData, ({ data }) => {
+        if (data.code === 0) {
+          this.$message.success('配置保存成功');
+        } else {
+          this.$message.error(data.msg || '配置保存失败');
+        }
+      });
     },
     resetConfig() {
       this.$confirm('确定要重置配置吗？', '提示', {
@@ -152,26 +162,158 @@ export default {
       }).then(() => {
         // 重置表单
         this.form = {
-          name: "",
-          timbre: "",
-          introduction: "",
-          prompt: "",
-          model: ""
+          agentCode: "",
+          agentName: "",
+          ttsVoiceId: "",
+          systemPrompt: "",
+          langCode: "",
+          language: "",
+          sort: "",
+          model: {
+            ttsModelId: "",
+            vadModelId: "",
+            asrModelId: "",
+            llmModelId: "",
+            memModelId: "",
+            intentModelId: "",
+          }
         }
         this.$message.success('配置已重置')
       }).catch(() => {
       })
+    },
+    fetchTemplates() {
+      Api.agent.getAgentTemplate(({ data }) => {
+        if (data.code === 0) {
+          this.templates = data.data;
+        } else {
+          this.$message.error(data.msg || '获取模板列表失败');
+        }
+      });
+    },
+    selectTemplate(template) {
+      if (this.loadingTemplate) return;
+      this.loadingTemplate = true;
+      try {
+        this.applyTemplateData(template);
+        this.$message.success(`「${template.agentName}」模板已应用`);
+      } catch (error) {
+        this.$message.error('应用模板失败');
+        console.error('应用模板失败:', error);
+      } finally {
+        this.loadingTemplate = false;
+      }
+    },
+    applyTemplateData(templateData) {
+      this.form = {
+        ...this.form,
+        agentName: templateData.agentName || this.form.agentName,
+        ttsVoiceId: templateData.ttsVoiceId || this.form.ttsVoiceId,
+        systemPrompt: templateData.systemPrompt || this.form.systemPrompt,
+        langCode: templateData.langCode || this.form.langCode,
+        model: {
+          ttsModelId: templateData.ttsModelId || this.form.model.ttsModelId,
+          vadModelId: templateData.vadModelId || this.form.model.vadModelId,
+          asrModelId: templateData.asrModelId || this.form.model.asrModelId,
+          llmModelId: templateData.llmModelId || this.form.model.llmModelId,
+          memModelId: templateData.memModelId || this.form.model.memModelId,
+          intentModelId: templateData.intentModelId || this.form.model.intentModelId
+        }
+      };
+    },
+    fetchAgentConfig(agentId) {
+      Api.agent.getDeviceConfig(agentId, ({ data }) => {
+        if (data.code === 0) {
+          this.form = {
+            ...this.form,
+            ...data.data,
+            model: {
+              ttsModelId: data.data.ttsModelId,
+              vadModelId: data.data.vadModelId,
+              asrModelId: data.data.asrModelId,
+              llmModelId: data.data.llmModelId,
+              memModelId: data.data.memModelId,
+              intentModelId: data.data.intentModelId
+            }
+          };
+        } else {
+          this.$message.error(data.msg || '获取配置失败');
+        }
+      });
+    },
+    fetchModelOptions() {
+      // 为每个模型类型获取选项
+      this.models.forEach(model => {
+        Api.model.getModelNames(model.type, '', ({ data }) => {
+          if (data.code === 0) {
+            this.$set(this.modelOptions, model.type, data.data.map(item => ({
+              value: item.id,
+              label: item.modelName
+            })));
+          } else {
+            this.$message.error(data.msg || '获取模型列表失败');
+          }
+        });
+      });
+    },
+    fetchVoiceOptions(modelId) {
+      if (!modelId) {
+        this.voiceOptions = [];
+        return;
+      }
+      Api.model.getModelVoices(modelId, '', ({ data }) => {
+        if (data.code === 0 && data.data) {
+          this.voiceOptions = data.data.map(voice => ({
+            value: voice.id,
+            label: voice.name
+          }));
+        } else {
+          this.voiceOptions = [];
+        }
+      });
     }
+  },
+  watch: {
+    'form.model.ttsModelId': {
+      handler(newVal, oldVal) {
+        console.log('TTS模型变化:', newVal);
+        if (oldVal && newVal !== oldVal) {
+          this.form.ttsVoiceId = '';
+          this.fetchVoiceOptions(newVal);
+        } else {
+          this.fetchVoiceOptions(newVal);
+        }
+      },
+      immediate: true
+    },
+    voiceOptions: {
+      handler(newVal) {
+        if (newVal && newVal.length > 0 && !this.form.ttsVoiceId) {
+          this.form.ttsVoiceId = newVal[0].value;
+        }
+      },
+      immediate: true
+    }
+  },
+  mounted() {
+    const agentId = this.$route.query.agentId;
+    if (agentId) {
+      this.fetchAgentConfig(agentId);
+    }
+    this.fetchModelOptions();
+    this.fetchTemplates();
   }
 }
 </script>
 
 <style scoped>
 .welcome {
-  min-width: 1200px;
-  min-height: 675px;
+  min-width: 900px;
+  min-height: 506px;
   height: 100vh;
-  background-image: url("@/assets/home/background.png");
+  display: flex;
+  flex-direction: column;
+  background: linear-gradient(145deg, #e6eeff, #eff0ff);
   background-size: cover;
   /* 确保背景图像覆盖整个元素 */
   background-position: center;
@@ -181,71 +323,97 @@ export default {
   -o-background-size: cover;
   /* 兼容老版本Opera浏览器 */
 }
+
+.el-form-item ::v-deep .el-form-item__label {
+  font-size: 10px !important;
+  color: #3d4566 !important;
+  font-weight: 400;
+  line-height: 22px;
+  padding-bottom: 2px;
+}
+
+.select-field {
+  width: 100%;
+  max-width: 720px;
+  border: 1px solid #e4e6ef;
+  background: #f6f8fb;
+  border-radius: 8px;
+  height: 36px !important;
+}
+
 .audio-box {
   flex: 1;
-  height: 46px;
-  border-radius: 10px;
+  height: 37px;
+  border-radius: 20px;
   border: 1px solid #e4e6ef;
 }
 
 .clear-btn {
-  width: 60px;
-  height: 24px;
+  width: 48px;
+  height: 19px;
   background: #fd8383;
-  border-radius: 12px;
-  line-height: 24px;
-  font-size: 14px;
+  border-radius: 10px;
+  line-height: 19px;
+  font-size: 11px;
   color: #fff;
   cursor: pointer;
 }
 
 .clear-text {
   color: #979db1;
-  font-size: 14px;
+  font-size: 11px;
   display: flex;
   align-items: center;
-  gap: 10px;
-  margin-left: 20px;
+  gap: 8px;
+  margin-left: 16px;
 }
 
 .template-item {
-  height: 46px;
-  width: 100px;
-  border-radius: 10px;
+  height: 37px;
+  width: 76px;
+  border-radius: 8px;
   background: #e6ebff;
-  line-height: 46px;
+  line-height: 37px;
   font-weight: 400;
-  font-size: 14px;
+  font-size: 11px;
   text-align: center;
   color: #5778ff;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.template-item:hover {
+  background-color: #d0d8ff;
 }
 
 .prompt-bottom {
-  margin-bottom: 5px;
+  margin-bottom: 4px;
   display: flex;
   justify-content: space-between;
-  padding: 0 20px;
+  padding: 0 16px;
   align-items: center;
 }
 
 .input-46 {
   border: 1px solid #e4e6ef;
   background: #f6f8fb;
-  border-radius: 10px;
+  border-radius: 8px;
+  height: 36px !important;
 }
 
 .save-btn,
 .reset-btn {
-  width: 140px;
-  height: 46px;
-  border-radius: 23px;
-  line-height: 46px;
+  width: 112px;
+  height: 37px;
+  border-radius: 18px;
+  line-height: 37px;
   box-sizing: border-box;
   cursor: pointer;
+  font-size: 11px
 }
 
 .save-btn {
-  border-radius: 23px;
+  border-radius: 18px;
   background: #5778ff;
   color: #fff;
 }
@@ -258,7 +426,7 @@ export default {
 
 .textarea-box {
   border: 1px solid #e4e6ef;
-  border-radius: 10px;
+  border-radius: 8px;
   background: #f6f8fb;
 }
 </style>

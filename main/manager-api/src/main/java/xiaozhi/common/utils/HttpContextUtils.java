@@ -1,7 +1,10 @@
 package xiaozhi.common.utils;
 
-import xiaozhi.common.constant.Constant;
-import jakarta.servlet.http.HttpServletRequest;
+import java.util.Date;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.Map;
+
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.HttpHeaders;
 import org.springframework.util.DigestUtils;
@@ -9,10 +12,9 @@ import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
-import java.util.Date;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.Map;
+import jakarta.servlet.http.HttpServletRequest;
+import xiaozhi.common.exception.ErrorCode;
+import xiaozhi.common.exception.RenException;
 
 /**
  * Http
@@ -30,13 +32,14 @@ public class HttpContextUtils {
         return ((ServletRequestAttributes) requestAttributes).getRequest();
     }
 
-    public static String getToken() {
-        HttpServletRequest httpRequest = getHttpServletRequest();
-        String token = httpRequest.getHeader(Constant.TOKEN_HEADER);
-
-        //如果header中不存在token，则从参数中获取token
+    public static String getToken(String authorization) {
+        String token;
+        if (StringUtils.isBlank(authorization) && authorization.contains("Bearer ")) {
+            throw new RenException(ErrorCode.UNAUTHORIZED);
+        }
+        token = authorization.replace("Bearer ", "");
         if (StringUtils.isBlank(token)) {
-            token = httpRequest.getParameter(Constant.TOKEN_HEADER);
+            throw new RenException(ErrorCode.TOKEN_NOT_EMPTY);
         }
         return token;
     }
@@ -68,15 +71,15 @@ public class HttpContextUtils {
     }
 
     public static String getLanguage() {
-        //默认语言
+        // 默认语言
         String defaultLanguage = "zh-CN";
-        //request
+        // request
         HttpServletRequest request = getHttpServletRequest();
         if (request == null) {
             return defaultLanguage;
         }
 
-        //请求语言
+        // 请求语言
         defaultLanguage = request.getHeader(HttpHeaders.ACCEPT_LANGUAGE);
 
         return defaultLanguage;

@@ -1,34 +1,40 @@
 <template>
   <div class="device-item">
     <div style="display: flex;justify-content: space-between;">
-      <div style="font-weight: 700;font-size: 24px;text-align: left;color: #3d4566;">
-        {{ device.mac }}
+      <div style="font-weight: 700;font-size: 18px;text-align: left;color: #3d4566;">
+        {{ device.agentName }}
       </div>
       <div>
-        <img src="@/assets/home/delete.png" alt=""
-             style="width: 24px;height: 24px;margin-right: 10px;" />
-        <img src="@/assets/home/info.png" alt="" style="width: 24px;height: 24px;" />
+        <img src="@/assets/home/delete.png" alt="" style="width: 18px;height: 18px;margin-right: 10px;"
+          @click.stop="handleDelete" />
+        <el-tooltip class="item" effect="dark" :content="device.systemPrompt" placement="top"
+          popper-class="custom-tooltip">
+          <img src="@/assets/home/info.png" alt="" style="width: 18px;height: 18px;" />
+        </el-tooltip>
       </div>
     </div>
     <div class="device-name">
-      设备型号：{{ device.model }}
+      设备型号：{{ device.ttsModelName }}
+    </div>
+    <div class="device-name">
+      音色模型：{{ device.ttsVoiceName }}
     </div>
     <div style="display: flex;gap: 10px;align-items: center;">
-      <div class="settings-btn" @click="$emit('configure')">
+      <div class="settings-btn" @click="handleConfigure">
         配置角色
       </div>
-      <div class="settings-btn">
-        声纹识别
+      <!--      <div class="settings-btn">-->
+      <!--        声纹识别-->
+      <!--      </div>-->
+      <!--      <div class="settings-btn">-->
+      <!--        历史对话-->
+      <!--      </div>-->
+      <div class="settings-btn" @click="handleDeviceManage">
+        设备管理({{ device.deviceCount }})
       </div>
-      <div class="settings-btn">
-        历史对话
-      </div>
-      <el-switch v-model="switchValue" inactive-text="OTA升级:" :width="42"
-                 style="margin-left: auto;" />
     </div>
     <div class="version-info">
-      <div>最近对话：{{ device.lastConversation }}</div>
-      <div>APP版本：{{ device.appVersion }}</div>
+      <div>最近对话：{{ device.lastConnectedAt }}</div>
     </div>
   </div>
 </template>
@@ -41,33 +47,45 @@ export default {
   },
   data() {
     return { switchValue: false }
+  },
+  methods: {
+    handleDelete() {
+      this.$emit('delete', this.device.agentId)
+    },
+    handleConfigure() {
+      this.$router.push({ path: '/role-config', query: { agentId: this.device.agentId } });
+    },
+    handleDeviceManage() {
+      this.$router.push({ path: '/device-management', query: { agentId: this.device.agentId } });
+    }
   }
 }
 </script>
 <style scoped>
 .device-item {
-  width: 455px;
+  width: 342px;
   border-radius: 20px;
   background: #fafcfe;
-  padding: 30px;
+  padding: 22px;
   box-sizing: border-box;
 }
+
 .device-name {
-  margin: 10px 0 14px;
+  margin: 7px 0 10px;
   font-weight: 400;
-  font-size: 14px;
+  font-size: 11px;
   color: #3d4566;
   text-align: left;
 }
 
 .settings-btn {
   font-weight: 500;
-  font-size: 14px;
+  font-size: 10px;
   color: #5778ff;
   background: #e6ebff;
-  width: 76px;
-  height: 28px;
-  line-height: 28px;
+  width: 57px;
+  height: 21px;
+  line-height: 21px;
   cursor: pointer;
   border-radius: 14px;
 }
@@ -75,9 +93,16 @@ export default {
 .version-info {
   display: flex;
   justify-content: space-between;
-  margin-top: 20px;
-  font-size: 14px;
+  margin-top: 15px;
+  font-size: 10px;
   color: #979db1;
   font-weight: 400;
+}
+</style>
+
+<style>
+.custom-tooltip {
+  max-width: 400px;
+  word-break: break-word;
 }
 </style>
