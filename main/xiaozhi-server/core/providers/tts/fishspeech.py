@@ -24,7 +24,7 @@ class ServeReferenceAudio(BaseModel):
     def decode_audio(cls, values):
         audio = values.get("audio")
         if (
-                isinstance(audio, str) and len(audio) > 255
+            isinstance(audio, str) and len(audio) > 255
         ):  # Check if audio is a string (Base64)
             try:
                 values["audio"] = base64.b64decode(audio)
@@ -89,25 +89,28 @@ class TTSProvider(TTSProviderBase):
         self.reference_audio = config.get("reference_audio", [])
         self.reference_text = config.get("reference_text", [])
         self.format = config.get("format", "wav")
-        self.channels = config.get("channels", 1)
-        self.rate = config.get("rate", 44100)
+        self.channels = int(config.get("channels", 1))
+        self.rate = int(config.get("rate", 44100))
         self.api_key = config.get("api_key", "YOUR_API_KEY")
         have_key = check_model_key("FishSpeech TTS", self.api_key)
         if not have_key:
             return
         self.normalize = config.get("normalize", True)
-        self.max_new_tokens = config.get("max_new_tokens", 1024)
-        self.chunk_length = config.get("chunk_length", 200)
-        self.top_p = config.get("top_p", 0.7)
-        self.repetition_penalty = config.get("repetition_penalty", 1.2)
-        self.temperature = config.get("temperature", 0.7)
-        self.streaming = config.get("streaming", False)
+        self.max_new_tokens = int(config.get("max_new_tokens", 1024))
+        self.chunk_length = int(config.get("chunk_length", 200))
+        self.top_p = float(config.get("top_p", 0.7))
+        self.repetition_penalty = float(config.get("repetition_penalty", 1.2))
+        self.temperature = float(config.get("temperature", 0.7))
+        self.streaming = bool(config.get("streaming", False))
         self.use_memory_cache = config.get("use_memory_cache", "on")
         self.seed = config.get("seed")
         self.api_url = config.get("api_url", "http://127.0.0.1:8080/v1/tts")
 
     def generate_filename(self, extension=".wav"):
-        return os.path.join(self.output_file, f"tts-{datetime.now().date()}@{uuid.uuid4().hex}{extension}")
+        return os.path.join(
+            self.output_file,
+            f"tts-{datetime.now().date()}@{uuid.uuid4().hex}{extension}",
+        )
 
     async def text_to_speak(self, text, output_file):
         # Prepare reference data
@@ -117,9 +120,7 @@ class TTSProvider(TTSProviderBase):
         data = {
             "text": text,
             "references": [
-                ServeReferenceAudio(
-                    audio=audio if audio else b"", text=text
-                )
+                ServeReferenceAudio(audio=audio if audio else b"", text=text)
                 for text, audio in zip(ref_texts, byte_audios)
             ],
             "reference_id": self.reference_id,
@@ -139,7 +140,9 @@ class TTSProvider(TTSProviderBase):
 
         response = requests.post(
             self.api_url,
-            data=ormsgpack.packb(pydantic_data, option=ormsgpack.OPT_SERIALIZE_PYDANTIC),
+            data=ormsgpack.packb(
+                pydantic_data, option=ormsgpack.OPT_SERIALIZE_PYDANTIC
+            ),
             headers={
                 "Authorization": f"Bearer {self.api_key}",
                 "Content-Type": "application/msgpack",
@@ -151,8 +154,6 @@ class TTSProvider(TTSProviderBase):
 
             with open(output_file, "wb") as audio_file:
                 audio_file.write(audio_content)
-
-
 
         else:
             print(f"Request failed with status code {response.status_code}")
